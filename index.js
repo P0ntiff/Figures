@@ -1,10 +1,10 @@
 require('dotenv').config()
 
-const { fetchTransactions } = require('./lib/fetch')
-const { transformTransactionsToUpdates } = require('./lib/transform')
-const { updateSheet } = require('./lib/update')
+import { fetchTransactions } from './lib/plaidFetch';
+import { transformTransactionsToUpdates } from './lib/transform';
+import { updateSheet } from './lib/update';
 
-;(async () => {
+(async () => {
   const transactions = await fetchTransactions()
   const updates = transformTransactionsToUpdates(transactions)
   updateSheet(updates)
