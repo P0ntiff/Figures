@@ -1,9 +1,9 @@
-require('dotenv').config()
+import 'dotenv/config.js'
 
-import { fetchTransactions } from './lib/plaidFetch';
-import { transformTransactionsToUpdates } from './lib/transform';
-import { getUpTransactions } from './lib/upClient';
-import { updateSheet } from './lib/update';
+// import { fetchTransactions } from './lib/plaidFetch.js';
+import { transformTransactionsToUpdates } from './lib/transform.js';
+import { getUpTransactions } from './lib/upClient.js';
+import { updateSheet } from './lib/update.js';
 
 (async () => {
   // const transactions = await fetchTransactions()
