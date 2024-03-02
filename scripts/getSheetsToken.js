@@ -1,4 +1,4 @@
-require('dotenv').config()
+import 'dotenv/config.js'
 
 import { createInterface } from 'readline'
 import { generateAuthUrl, getToken } from '../lib/googleClient'

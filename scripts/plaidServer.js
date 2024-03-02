@@ -1,5 +1,4 @@
-import { config } from 'dotenv'
-config()
+import 'dotenv/config.js'
 
 const account = process.argv[2]
 if (!account) {

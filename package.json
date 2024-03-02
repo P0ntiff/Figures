@@ -4,6 +4,7 @@
   "main": "index.js",
   "author": "Ben Gattas",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "test": "node index.js",
     "test-plaid": "node scripts/testPlaid.js",

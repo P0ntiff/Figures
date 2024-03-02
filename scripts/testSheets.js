@@ -1,4 +1,4 @@
-require('dotenv').config()
+import 'dotenv/config.js'
 
 import { updateSheet } from '../lib/update'
 

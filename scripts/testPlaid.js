@@ -1,4 +1,4 @@
-require('dotenv').config()
+import 'dotenv/config.js'
 
 import { fetchTransactions } from '../lib/plaidFetch';
 
