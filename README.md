@@ -1,4 +1,4 @@
-# Build Your Own Mint
+# Figures: Fork of Build-your-own-mint
 
 ## Important Disclaimer
 

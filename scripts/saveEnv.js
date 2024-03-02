@@ -1,12 +1,12 @@
-const fs = require('fs')
-const path = require('path')
-const dotenv = require('dotenv')
-const envPath = path.resolve(__dirname, '../.env')
+import { readFileSync, writeFileSync } from 'fs'
+import { resolve } from 'path'
+import { parse } from 'dotenv'
+const envPath = resolve(__dirname, '../.env')
 
-module.exports = function(vars) {
+export default function(vars) {
   let current
   try {
-    current = dotenv.parse(fs.readFileSync(envPath))
+    current = parse(readFileSync(envPath))
   } catch (e) {
     current = {}
   }
@@ -14,5 +14,5 @@ module.exports = function(vars) {
   const serlized = Object.keys(current)
     .map(key => `${key}=${current[key]}`)
     .join(`\n`)
-  fs.writeFileSync(envPath, serlized)
+  writeFileSync(envPath, serlized)
 }

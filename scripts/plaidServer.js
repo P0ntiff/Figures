@@ -1,30 +1,29 @@
-const dotenv = require('dotenv')
-dotenv.config()
+import { config } from 'dotenv'
+config()
 
 const account = process.argv[2]
 if (!account) {
   throw new Error('An account name must be provided.')
 }
 
-const fs = require('fs')
-const util = require('util')
-const path = require('path')
-const moment = require('moment')
-const express = require('express')
-const bodyParser = require('body-parser')
-const client = require('../lib/plaidClient')
-const saveEnv = require('./saveEnv')
+import { inspect } from 'util'
+import { resolve } from 'path'
+import moment from 'moment'
+import express from 'express'
+import { urlencoded, json as _json } from 'body-parser'
+import client, { exchangePublicToken, getTransactions, getIdentity, getBalance, getAccounts, getAuth, createAssetReport, getItem, getInstitutionById } from '../lib/plaidClient'
+import saveEnv from './saveEnv'
 
 const app = express()
-app.use(express.static(path.resolve(__dirname)))
+app.use(express.static(resolve(__dirname)))
 app.set('view engine', 'ejs')
-app.use(bodyParser.urlencoded({
+app.use(urlencoded({
   extended: false
 }))
-app.use(bodyParser.json())
+app.use(_json())
 
 app.get('/', (req, res, next) => {
-  res.render(path.resolve(__dirname, 'plaid.ejs'), {
+  res.render(resolve(__dirname, 'plaid.ejs'), {
     PLAID_ACCOUNT: account,
     PLAID_PUBLIC_KEY: process.env.PLAID_PUBLIC_KEY
   })
@@ -49,7 +48,7 @@ function saveAccessToken(token) {
 // https://plaid.com/docs/#exchange-token-flow
 app.post('/get_access_token', function(request, response, next) {
   PUBLIC_TOKEN = request.body.public_token;
-  client.exchangePublicToken(PUBLIC_TOKEN, function(error, tokenResponse) {
+  exchangePublicToken(PUBLIC_TOKEN, function(error, tokenResponse) {
     if (error != null) {
       prettyPrintResponse(error);
       return response.json({
@@ -75,7 +74,7 @@ app.get('/transactions', function(request, response, next) {
   // Pull transactions for the Item for the last 30 days
   var startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
   var endDate = moment().format('YYYY-MM-DD');
-  client.getTransactions(ACCESS_TOKEN, startDate, endDate, {
+  getTransactions(ACCESS_TOKEN, startDate, endDate, {
     count: 250,
     offset: 0,
   }, function(error, transactionsResponse) {
@@ -94,7 +93,7 @@ app.get('/transactions', function(request, response, next) {
 // Retrieve Identity for an Item
 // https://plaid.com/docs/#identity
 app.get('/identity', function(request, response, next) {
-  client.getIdentity(ACCESS_TOKEN, function(error, identityResponse) {
+  getIdentity(ACCESS_TOKEN, function(error, identityResponse) {
     if (error != null) {
       prettyPrintResponse(error);
       return response.json({
@@ -109,7 +108,7 @@ app.get('/identity', function(request, response, next) {
 // Retrieve real-time Balances for each of an Item's accounts
 // https://plaid.com/docs/#balance
 app.get('/balance', function(request, response, next) {
-  client.getBalance(ACCESS_TOKEN, function(error, balanceResponse) {
+  getBalance(ACCESS_TOKEN, function(error, balanceResponse) {
     if (error != null) {
       prettyPrintResponse(error);
       return response.json({
@@ -124,7 +123,7 @@ app.get('/balance', function(request, response, next) {
 // Retrieve an Item's accounts
 // https://plaid.com/docs/#accounts
 app.get('/accounts', function(request, response, next) {
-  client.getAccounts(ACCESS_TOKEN, function(error, accountsResponse) {
+  getAccounts(ACCESS_TOKEN, function(error, accountsResponse) {
     if (error != null) {
       prettyPrintResponse(error);
       return response.json({
@@ -139,7 +138,7 @@ app.get('/accounts', function(request, response, next) {
 // Retrieve ACH or ETF Auth data for an Item's accounts
 // https://plaid.com/docs/#auth
 app.get('/auth', function(request, response, next) {
-  client.getAuth(ACCESS_TOKEN, function(error, authResponse) {
+  getAuth(ACCESS_TOKEN, function(error, authResponse) {
     if (error != null) {
       prettyPrintResponse(error);
       return response.json({
@@ -176,7 +175,7 @@ app.get('/assets', function(request, response, next) {
       email: 'alice@example.com',
     },
   };
-  client.createAssetReport(
+  createAssetReport(
     [ACCESS_TOKEN],
     daysRequested,
     options,
@@ -200,7 +199,7 @@ app.get('/assets', function(request, response, next) {
 app.get('/item', function(request, response, next) {
   // Pull the Item - this includes information about available products,
   // billed products, webhook information, and more.
-  client.getItem(ACCESS_TOKEN, function(error, itemResponse) {
+  getItem(ACCESS_TOKEN, function(error, itemResponse) {
     if (error != null) {
       prettyPrintResponse(error);
       return response.json({
@@ -208,7 +207,7 @@ app.get('/item', function(request, response, next) {
       });
     }
     // Also pull information about the institution
-    client.getInstitutionById(itemResponse.item.institution_id, function(err, instRes) {
+    getInstitutionById(itemResponse.item.institution_id, function(err, instRes) {
       if (err != null) {
         var msg = 'Unable to pull institution information from the Plaid API.';
         console.log(msg + '\n' + JSON.stringify(error));
@@ -231,7 +230,7 @@ var server = app.listen(APP_PORT, function() {
 });
 
 var prettyPrintResponse = response => {
-  console.log(util.inspect(response, {colors: true, depth: 4}));
+  console.log(inspect(response, {colors: true, depth: 4}));
 };
 
 // This is a helper function to poll for the completion of an Asset Report and
@@ -291,7 +290,7 @@ var respondWithAssetReport = (
 
 app.post('/set_access_token', function(request, response, next) {
   ACCESS_TOKEN = request.body.access_token;
-  client.getItem(ACCESS_TOKEN, function(error, itemResponse) {
+  getItem(ACCESS_TOKEN, function(error, itemResponse) {
     response.json({
       item_id: itemResponse.item.item_id,
       error: false,

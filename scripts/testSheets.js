@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const { updateSheet } = require('../lib/update')
+import { updateSheet } from '../lib/update'
 
 updateSheet([{
   range: 'A1',
